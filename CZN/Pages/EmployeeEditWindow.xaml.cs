@@ -1,16 +1,19 @@
 ﻿using CZN.Models;
 using CZN.Services;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace CZN.Pages
 {
     /// <summary>
     /// Логика взаимодействия для EmployeeEditWindow.xaml
     /// </summary>
-    public partial class EmployeeEditWindow : Window
+    public partial class EmployeeEditWindow : Window, INotifyPropertyChanged
     {
         private AdminEmployeesModel _employee;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public EmployeeEditWindow(AdminEmployeesModel employee = null)
         {
@@ -79,6 +82,29 @@ namespace CZN.Pages
         {
             DialogResult = false;
             Close();
+        }
+        private void cbDepartments_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbDepartments.SelectedItem is Departments selectedDepartment && DataContext is AdminEmployeesModel employee)
+            {
+                employee.Department = selectedDepartment.Name;
+                employee.DepartmentAddress = selectedDepartment.Address;
+
+                using (var context = Helper.GetContext())
+                {
+                    var district = context.Districts
+                        .FirstOrDefault(d => d.DistrictID == selectedDepartment.DistrictID);
+                    employee.DistrictName = district?.Name;
+                }
+
+                OnPropertyChanged(nameof(employee.Department));
+                OnPropertyChanged(nameof(employee.DepartmentAddress));
+                OnPropertyChanged(nameof(employee.DistrictName));
+            }
+        }
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

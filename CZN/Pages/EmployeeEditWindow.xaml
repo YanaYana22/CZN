@@ -5,12 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CZN.Pages"
         mc:Ignorable="d"
-        Title="Редактирование сотрудника" Height="700" Width="800">
+        Title="Редактирование сотрудника" 
+        Height="800" 
+        Width="800"
+        WindowStartupLocation="CenterScreen">
+
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <Style x:Key="ReadOnlyTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#FFF0F0F0"/>
+            <Setter Property="BorderBrush" Value="#FFABADB3"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+        </Style>
     </Window.Resources>
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -25,6 +37,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
+        <!-- Основная информация -->
         <TextBlock Text="Фамилия:" Grid.Row="0"/>
         <TextBox Text="{Binding LastName}" Grid.Row="1" Margin="0,0,0,10"/>
 
@@ -32,21 +45,29 @@
         <TextBox Text="{Binding FirstName}" Grid.Row="3" Margin="0,0,0,10"/>
 
         <TextBlock Text="Отчество:" Grid.Row="4"/>
-        <TextBox Text="{Binding MiddleName}" Grid.Row="5" Margin="0,0,0,10" Name="txtMiddleName"/>
-        <Grid Margin="0,0,0,10">
-            <TextBlock Text="*необязательно" Foreground="Gray" Margin="4,115,6,-115" 
-               IsHitTestVisible="False"
+        <Grid Grid.Row="5" Margin="0,0,0,10">
+            <TextBox Text="{Binding MiddleName}" Name="txtMiddleName"/>
+            <TextBlock Text="*необязательно" 
+                       Foreground="Gray" 
+                       Margin="5,0"
                        FontStyle="Italic"
-               Visibility="{Binding ElementName=txtMiddleName, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                       IsHitTestVisible="False"
+                       Visibility="{Binding ElementName=txtMiddleName, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </Grid>
 
         <TextBlock Text="Отдел:" Grid.Row="6"/>
-        <ComboBox x:Name="cbDepartments" DisplayMemberPath="Name" Grid.Row="7" Margin="0,0,0,10"/>
+        <ComboBox x:Name="cbDepartments" 
+                  DisplayMemberPath="Name" 
+                  Grid.Row="7" 
+                  Margin="0,0,0,10"/>
 
-        <TextBlock Text="Должность:" Grid.Row="8"/>
-        <ComboBox x:Name="cbPositions" DisplayMemberPath="Title" Grid.Row="9" Margin="0,0,0,20"/>
+        <TextBlock Text="Должность:" Grid.Row="11" Margin="0,0,0,283" Grid.RowSpan="2"/>
+        <ComboBox x:Name="cbPositions" 
+                  DisplayMemberPath="Title" 
+                  Grid.Row="12" 
+                  Margin="0,26,0,260"/>
 
-        <TabControl Grid.Row="10">
+        <TabControl Grid.Row="12" Margin="0,77,0,10" Grid.RowSpan="2">
             <TabItem Header="Контактные данные">
                 <StackPanel Margin="5">
                     <TextBlock Text="Внутренний телефон:"/>
@@ -58,10 +79,12 @@
                     <TextBlock Text="Мобильный телефон:"/>
                     <Grid Margin="0,0,0,10">
                         <TextBox Text="{Binding MobilePhone}" Name="txtMobilePhone"/>
-                        <TextBlock Text="*необязательно" Foreground="Gray" Margin="5,0" 
+                        <TextBlock Text="*необязательно" 
+                                   Foreground="Gray" 
+                                   Margin="5,0"
                                    FontStyle="Italic"
-               IsHitTestVisible="False"
-               Visibility="{Binding ElementName=txtMobilePhone, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                   IsHitTestVisible="False"
+                                   Visibility="{Binding ElementName=txtMobilePhone, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     </Grid>
 
                     <TextBlock Text="Email:"/>
@@ -70,23 +93,25 @@
                     <TextBlock Text="Примечание:"/>
                     <Grid Margin="0,0,0,10">
                         <TextBox Text="{Binding Notes}" 
-             AcceptsReturn="True" 
-             Height="60" 
-             Name="txtNotes"/>
+                                 AcceptsReturn="True" 
+                                 Height="60" 
+                                 Name="txtNotes"/>
                         <TextBlock Text="*необязательно" 
-               Foreground="Gray" 
-               Margin="5,5"
-               FontStyle="Italic"
-               IsHitTestVisible="False"
-               Visibility="{Binding ElementName=txtNotes, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                   Foreground="Gray" 
+                                   Margin="5,5"
+                                   FontStyle="Italic"
+                                   IsHitTestVisible="False"
+                                   Visibility="{Binding ElementName=txtNotes, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     </Grid>
                 </StackPanel>
             </TabItem>
         </TabControl>
 
-        <GroupBox Header="Административные права" Grid.Row="11">
+        <GroupBox Header="Административные права" Grid.Row="13" Margin="0,48,0,10">
             <StackPanel>
-                <CheckBox x:Name="chkIsAdmin" Content="Назначить администратором" Margin="5"
+                <CheckBox x:Name="chkIsAdmin" 
+                          Content="Назначить администратором" 
+                          Margin="5"
                           IsChecked="{Binding IsAdmin}"/>
                 <StackPanel x:Name="pnlAdminCredentials" Margin="5,0,5,5">
                     <TextBlock Text="Логин:"/>
@@ -97,9 +122,19 @@
             </StackPanel>
         </GroupBox>
 
-        <StackPanel Grid.Row="12" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Сохранить" Width="100" Margin="5" Click="btnSave_Click" Height="45"/>
-            <Button Content="Отмена" Width="100" Margin="5" Click="btnCancel_Click" Height="45"/>
+        <StackPanel Grid.Row="13" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" Margin="0,189,0,22">
+            <Button Content="Сохранить" 
+                    Width="100" 
+                    Margin="5" 
+                    Click="btnSave_Click" 
+                    Height="35"/>
+            <Button Content="Отмена" 
+                    Width="100" 
+                    Margin="5" 
+                    Click="btnCancel_Click" 
+                    Height="35"/>
         </StackPanel>
     </Grid>
 </Window>

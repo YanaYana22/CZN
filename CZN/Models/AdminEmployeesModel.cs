@@ -21,5 +21,7 @@ namespace CZN.Models
         public string Notes { get; set; }
         public bool IsAdmin { get; set; }
         public string Username { get; set; }
+        public string DepartmentAddress { get; set; }
+        public string DistrictName { get; set; }
     }
 }

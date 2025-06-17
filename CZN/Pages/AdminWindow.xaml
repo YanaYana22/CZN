@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CZN.Pages"
         mc:Ignorable="d"
-        Title="Администраторская панель ЦЗН" Height="700" Width="800">
+        Title="Администраторская панель ЦЗН" Height="700" Width="1400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -22,16 +22,33 @@
         <DataGrid x:Name="dgEmployees" Grid.Row="1" Margin="5" AutoGenerateColumns="False"
                   CanUserAddRows="False" IsReadOnly="True" SelectionMode="Single">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Фамилия" Width="80" Binding="{Binding LastName}"/>
-                <DataGridTextColumn Header="Имя" Width="80" Binding="{Binding FirstName}"/>
-                <DataGridTextColumn Header="Отчество" Width="100" Binding="{Binding MiddleName}"/>
+                <DataGridTextColumn Header="ФИО" Width="210">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding StringFormat="{}{0} {1} {2}">
+                            <Binding Path="LastName"/>
+                            <Binding Path="FirstName"/>
+                            <Binding Path="MiddleName"/>
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
                 <DataGridTextColumn Header="Отдел" Width="180" Binding="{Binding Department}"/>
                 <DataGridTextColumn Header="Должность" Width="200" Binding="{Binding Position}"/>
                 <DataGridTextColumn Header="Внутр. телефон" Width="100" Binding="{Binding InternalPhone}"/>
                 <DataGridTextColumn Header="Городской" Width="70" Binding="{Binding CityPhone}"/>
                 <DataGridTextColumn Header="Мобильный" Width="120" Binding="{Binding MobilePhone}"/>
                 <DataGridTextColumn Header="Email" Width="120" Binding="{Binding Email}"/>
+                <DataGridTextColumn Header="Примечание" Width="200" Binding="{Binding Notes}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextWrapping" Value="Wrap"/>
+                            <Setter Property="MaxWidth" Value="200"/>
+                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
                 <DataGridCheckBoxColumn Header="Админ" Width="50" Binding="{Binding IsAdmin}"/>
+                <DataGridTextColumn Header="Адрес отдела" Width="200" Binding="{Binding DepartmentAddress}"/>
+                <DataGridTextColumn Header="Район" Width="150" Binding="{Binding DistrictName}"/>
                 <DataGridTemplateColumn Width="70">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

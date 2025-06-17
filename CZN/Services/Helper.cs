@@ -53,25 +53,30 @@ namespace CZN.Services
         {
             var context = GetContext();
 
-            return context.Employees
-                .AsEnumerable()
-                .Select(employee => new AdminEmployeesModel
-                {
-                    EmployeeID = employee.EmployeeID,
-                    LastName = employee.LastName,
-                    FirstName = employee.FirstName,
-                    MiddleName = employee.MiddleName,
-                    Department = context.Departments.FirstOrDefault(d => d.DepartmentID == employee.DepartmentID)?.Name,
-                    Position = context.Positions.FirstOrDefault(p => p.PositionID == employee.PositionID)?.Title,
-                    InternalPhone = context.ContactInfo.FirstOrDefault(c => c.EmployeeID == employee.EmployeeID)?.InternalPhone,
-                    CityPhone = context.ContactInfo.FirstOrDefault(c => c.EmployeeID == employee.EmployeeID)?.CityPhone,
-                    MobilePhone = context.ContactInfo.FirstOrDefault(c => c.EmployeeID == employee.EmployeeID)?.MobilePhone,
-                    Email = context.ContactInfo.FirstOrDefault(c => c.EmployeeID == employee.EmployeeID)?.Email,
-                    Notes = context.ContactInfo.FirstOrDefault(c => c.EmployeeID == employee.EmployeeID)?.Notes,
-                    IsAdmin = context.Users.Any(u => u.EmployeeID == employee.EmployeeID && u.RoleID == 1),
-                    Username = context.Users.FirstOrDefault(u => u.EmployeeID == employee.EmployeeID)?.Username
-                })
-                .ToList();
+            return (from e in context.Employees
+                    join d in context.Departments on e.DepartmentID equals d.DepartmentID
+                    join dist in context.Districts on d.DistrictID equals dist.DistrictID
+                    join p in context.Positions on e.PositionID equals p.PositionID
+                    from c in context.ContactInfo.Where(ci => ci.EmployeeID == e.EmployeeID).DefaultIfEmpty()
+                    from u in context.Users.Where(user => user.EmployeeID == e.EmployeeID).DefaultIfEmpty()
+                    select new AdminEmployeesModel
+                    {
+                        EmployeeID = e.EmployeeID,
+                        LastName = e.LastName,
+                        FirstName = e.FirstName,
+                        MiddleName = e.MiddleName,
+                        Department = d.Name,
+                        DepartmentAddress = d.Address,
+                        DistrictName = dist.Name,
+                        Position = p.Title,
+                        InternalPhone = c.InternalPhone,
+                        CityPhone = c.CityPhone,
+                        MobilePhone = c.MobilePhone,
+                        Email = c.Email,
+                        Notes = c.Notes,
+                        IsAdmin = u != null && u.RoleID == 1,
+                        Username = u.Username
+                    }).ToList();
         }
         public static bool SaveEmployee(AdminEmployeesModel model, string username = null, string password = null)
         {
