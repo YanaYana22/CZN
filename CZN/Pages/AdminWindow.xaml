@@ -1,0 +1,48 @@
+﻿<Window x:Class="CZN.Pages.AdminWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CZN.Pages"
+        mc:Ignorable="d"
+        Title="Администраторская панель ЦЗН" Height="700" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5">
+            <TextBox x:Name="txtSearch" Width="200" Margin="5" 
+                     TextChanged="txtSearch_TextChanged"/>
+            <Button Content="Добавить" Margin="5" Click="btnAdd_Click"/>
+            <Button Content="Обновить" Margin="5" Click="btnRefresh_Click"/>
+        </StackPanel>
+
+        <DataGrid x:Name="dgEmployees" Grid.Row="1" Margin="5" AutoGenerateColumns="False"
+                  CanUserAddRows="False" IsReadOnly="True" SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Фамилия" Width="80" Binding="{Binding LastName}"/>
+                <DataGridTextColumn Header="Имя" Width="80" Binding="{Binding FirstName}"/>
+                <DataGridTextColumn Header="Отчество" Width="100" Binding="{Binding MiddleName}"/>
+                <DataGridTextColumn Header="Отдел" Width="180" Binding="{Binding Department}"/>
+                <DataGridTextColumn Header="Должность" Width="200" Binding="{Binding Position}"/>
+                <DataGridTextColumn Header="Внутр. телефон" Width="100" Binding="{Binding InternalPhone}"/>
+                <DataGridTextColumn Header="Городской" Width="70" Binding="{Binding CityPhone}"/>
+                <DataGridTextColumn Header="Мобильный" Width="120" Binding="{Binding MobilePhone}"/>
+                <DataGridTextColumn Header="Email" Width="120" Binding="{Binding Email}"/>
+                <DataGridCheckBoxColumn Header="Админ" Width="50" Binding="{Binding IsAdmin}"/>
+                <DataGridTemplateColumn Width="70">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Ред." Margin="2" Click="Edit_Click"/>
+                                <Button Content="Удал." Margin="2" Click="Delete_Click"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
