@@ -13,10 +13,10 @@ namespace CZN.Models
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class CZNEntities : DbContext
+    public partial class CZNEntities1 : DbContext
     {
-        public CZNEntities()
-            : base("name=CZNEntities")
+        public CZNEntities1()
+            : base("name=CZNEntities1")
         {
         }
     
@@ -31,6 +31,7 @@ namespace CZN.Models
         public virtual DbSet<Employees> Employees { get; set; }
         public virtual DbSet<Positions> Positions { get; set; }
         public virtual DbSet<Roles> Roles { get; set; }
+        public virtual DbSet<sysdiagrams> sysdiagrams { get; set; }
         public virtual DbSet<Users> Users { get; set; }
     }
 }

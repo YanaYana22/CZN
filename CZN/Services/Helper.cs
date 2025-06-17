@@ -7,13 +7,13 @@ namespace CZN.Services
 {
     public class Helper
     {
-        private static CZNEntities _context;
+        private static CZNEntities1 _context;
 
-        public static CZNEntities GetContext()
+        public static CZNEntities1 GetContext()
         {
             if (_context == null)
             {
-                _context = new CZNEntities();
+                _context = new CZNEntities1();
             }
             return _context;
         }
@@ -27,18 +27,7 @@ namespace CZN.Services
                            u.Username == username &&
                            u.PasswordHash == hashedPassword);
 
-                if (user != null)
-                {
-                    return new Users
-                    {
-                        UserID = user.UserID,
-                        Username = user.Username,
-                        PasswordHash = user.PasswordHash,
-                        RoleID = user.RoleID,
-                        EmployeeID = user.EmployeeID
-                    };
-                }
-                return null;
+                return user;
             }
             catch
             {
@@ -47,9 +36,9 @@ namespace CZN.Services
         }
         public static bool IsAdmin(Users user)
         {
-            return user?.RoleID == 1;
+            return user != null && user.RoleID == 1 && !user.IsLocked;
         }
-        public static List<AdminEmployeesModel> GetEmployeesWithDetails()
+        public static List<AdminEmployeesModel> GetEmployeesWithDetails(int currentAdminId)
         {
             var context = GetContext();
 
@@ -75,7 +64,9 @@ namespace CZN.Services
                         Email = c.Email,
                         Notes = c.Notes,
                         IsAdmin = u != null && u.RoleID == 1,
-                        Username = u.Username
+                        Username = u.Username,
+                        IsLocked = u != null ? u.IsLocked : false,
+                        CanBeLocked = u != null && u.RoleID == 1 && u.UserID != currentAdminId
                     }).ToList();
         }
         public static bool SaveEmployee(AdminEmployeesModel model, string username = null, string password = null)

@@ -19,6 +19,7 @@ namespace CZN.Models
         public string PasswordHash { get; set; }
         public int RoleID { get; set; }
         public Nullable<int> EmployeeID { get; set; }
+        public bool IsLocked { get; set; }
     
         public virtual Employees Employees { get; set; }
         public virtual Roles Roles { get; set; }

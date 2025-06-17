@@ -23,5 +23,7 @@ namespace CZN.Models
         public string Username { get; set; }
         public string DepartmentAddress { get; set; }
         public string DistrictName { get; set; }
+        public bool IsLocked { get; set; }
+        public bool CanBeLocked { get; set; }
     }
 }

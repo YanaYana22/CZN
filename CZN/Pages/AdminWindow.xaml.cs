@@ -1,5 +1,6 @@
 ﻿using CZN.Models;
 using CZN.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -12,18 +13,29 @@ namespace CZN.Pages
     /// </summary>
     public partial class AdminWindow : Window
     {
+        private int _currentAdminId;
         private List<AdminEmployeesModel> _allEmployees;
 
-        public AdminWindow()
+        public AdminWindow(int currentAdminId)
         {
             InitializeComponent();
+            _currentAdminId = currentAdminId;
             LoadEmployees();
         }
 
         private void LoadEmployees()
         {
-            _allEmployees = Helper.GetEmployeesWithDetails();
-            dgEmployees.ItemsSource = _allEmployees;
+            try
+            {
+                _allEmployees = Helper.GetEmployeesWithDetails(_currentAdminId);
+                dgEmployees.ItemsSource = _allEmployees;
+                dgEmployees.Items.Refresh();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки данных: {ex.Message}", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
@@ -48,6 +60,7 @@ namespace CZN.Pages
             if (editWindow.ShowDialog() == true)
             {
                 LoadEmployees();
+                txtSearch.Clear();
             }
         }
 
@@ -78,6 +91,57 @@ namespace CZN.Pages
                     MessageBox.Show("Не удалось удалить сотрудника", "Ошибка");
                 }
             }
+        }
+        private void LockCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+            if (checkBox?.DataContext is AdminEmployeesModel employee && employee.CanBeLocked)
+            {
+                bool newLockedState = checkBox.IsChecked == true;
+
+                if (MessageBox.Show(
+                    $"Вы уверены, что хотите {(newLockedState ? "за" : "раз")}блокировать администратора {employee.LastName}?",
+                    "Подтверждение",
+                    MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        using (var context = new CZNEntities1())
+                        {
+                            var user = context.Users.FirstOrDefault(u => u.EmployeeID == employee.EmployeeID);
+                            if (user != null)
+                            {
+                                user.IsLocked = newLockedState;
+                                context.SaveChanges();
+
+                                employee.IsLocked = newLockedState;
+                                dgEmployees.Items.Refresh();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка: {ex.Message}");
+                        checkBox.IsChecked = !newLockedState;
+                    }
+                }
+                else
+                {
+                    checkBox.IsChecked = !newLockedState;
+                }
+            }
+        }
+        private void btnLogout_Click(object sender, RoutedEventArgs e)
+        {
+            if (Application.Current.Properties.Contains("CurrentUserId"))
+            {
+                Application.Current.Properties.Remove("CurrentUserId");
+            }
+
+            var loginWindow = new LoginWindow();
+            loginWindow.Show();
+
+            this.Close();
         }
     }
 }

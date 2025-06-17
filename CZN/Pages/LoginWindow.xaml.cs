@@ -20,6 +20,7 @@ namespace CZN.Pages
     /// </summary>
     public partial class LoginWindow : Window
     {
+        private int currentUserId;
         public LoginWindow()
         {
             InitializeComponent();
@@ -29,18 +30,24 @@ namespace CZN.Pages
             string username = txtUsername.Text;
             string password = txtPassword.Password;
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-            {
-                MessageBox.Show("Введите логин и пароль", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
             var user = Helper.AuthUser(username, password);
+
             if (user != null)
             {
+                if (user.IsLocked && user.RoleID == 1)
+                {
+                    MessageBox.Show("Ваш доступ как администратора ограничен!", "Ограничение доступа",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                    UserWindow userWindow = new UserWindow();
+                    userWindow.Show();
+                    this.Close();
+                    return;
+                }
+
                 if (Helper.IsAdmin(user))
                 {
-                    AdminWindow adminWindow = new AdminWindow();
+                    AdminWindow adminWindow = new AdminWindow(user.UserID);
                     adminWindow.Show();
                 }
                 else
@@ -52,7 +59,8 @@ namespace CZN.Pages
             }
             else
             {
-                MessageBox.Show("Неверный логин или пароль", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Неверный логин или пароль", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
