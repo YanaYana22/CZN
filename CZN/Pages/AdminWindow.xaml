@@ -68,12 +68,11 @@
                 <DataGridTemplateColumn Header="Блокировка" Width="100">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding IsLocked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                      Content="{Binding IsLocked, Converter={StaticResource BoolToLockedTextConverter}}"
-                      IsEnabled="{Binding CanBeLocked}"
-                      Click="LockCheckBox_Click"
-                      HorizontalAlignment="Center"
-                      Margin="5"/>
+                            <CheckBox IsChecked="{Binding IsLocked, Mode=TwoWay}"
+                              IsEnabled="{Binding CanBeLocked}"
+                              Content="{Binding IsLocked, Converter={StaticResource BoolToLockedTextConverter}}"
+                              HorizontalAlignment="Center"
+                              Click="LockCheckBox_Click"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

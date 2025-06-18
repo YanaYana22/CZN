@@ -37,7 +37,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Основная информация -->
         <TextBlock Text="Фамилия:" Grid.Row="0"/>
         <TextBox Text="{Binding LastName}" Grid.Row="1" Margin="0,0,0,10"/>
 
@@ -57,13 +56,18 @@
 
         <TextBlock Text="Отдел:" Grid.Row="6"/>
         <ComboBox x:Name="cbDepartments" 
-                  DisplayMemberPath="Name" 
+          DisplayMemberPath="Name"
+          SelectedValuePath="Name"
+          SelectedValue="{Binding Department, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+          SelectionChanged="cbDepartments_SelectionChanged"
                   Grid.Row="7" 
                   Margin="0,0,0,10"/>
 
         <TextBlock Text="Должность:" Grid.Row="11" Margin="0,0,0,283" Grid.RowSpan="2"/>
         <ComboBox x:Name="cbPositions" 
-                  DisplayMemberPath="Title" 
+          DisplayMemberPath="Title"
+          SelectedValuePath="Title"
+          SelectedValue="{Binding Position, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                   Grid.Row="12" 
                   Margin="0,26,0,260"/>
 

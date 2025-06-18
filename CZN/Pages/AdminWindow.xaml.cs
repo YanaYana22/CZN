@@ -95,38 +95,35 @@ namespace CZN.Pages
         private void LockCheckBox_Click(object sender, RoutedEventArgs e)
         {
             var checkBox = sender as CheckBox;
-            if (checkBox?.DataContext is AdminEmployeesModel employee && employee.CanBeLocked)
+            if (checkBox?.DataContext is AdminEmployeesModel employee)
             {
                 bool newLockedState = checkBox.IsChecked == true;
 
-                if (MessageBox.Show(
-                    $"Вы уверены, что хотите {(newLockedState ? "за" : "раз")}блокировать администратора {employee.LastName}?",
-                    "Подтверждение",
-                    MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                if (employee.UserID == _currentAdminId)
                 {
-                    try
-                    {
-                        using (var context = new CZNEntities1())
-                        {
-                            var user = context.Users.FirstOrDefault(u => u.EmployeeID == employee.EmployeeID);
-                            if (user != null)
-                            {
-                                user.IsLocked = newLockedState;
-                                context.SaveChanges();
+                    MessageBox.Show("Вы не можете заблокировать себя!");
+                    checkBox.IsChecked = false;
+                    return;
+                }
 
-                                employee.IsLocked = newLockedState;
-                                dgEmployees.Items.Refresh();
-                            }
+                try
+                {
+                    using (var context = new CZNEntities1())
+                    {
+                        var user = context.Users.FirstOrDefault(u => u.EmployeeID == employee.EmployeeID);
+                        if (user != null)
+                        {
+                            user.IsLocked = newLockedState;
+                            context.SaveChanges();
+
+                            employee.IsLocked = newLockedState;
+                            dgEmployees.Items.Refresh();
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Ошибка: {ex.Message}");
-                        checkBox.IsChecked = !newLockedState;
-                    }
                 }
-                else
+                catch (Exception ex)
                 {
+                    MessageBox.Show($"Ошибка изменения блокировки: {ex.Message}");
                     checkBox.IsChecked = !newLockedState;
                 }
             }

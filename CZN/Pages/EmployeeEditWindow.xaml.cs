@@ -1,110 +1,129 @@
 ﻿using CZN.Models;
 using CZN.Services;
 using System.ComponentModel;
+using System.Data.Entity;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace CZN.Pages
 {
-    /// <summary>
-    /// Логика взаимодействия для EmployeeEditWindow.xaml
-    /// </summary>
     public partial class EmployeeEditWindow : Window, INotifyPropertyChanged
     {
         private AdminEmployeesModel _employee;
+        private CZNEntities1 _context;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public EmployeeEditWindow(AdminEmployeesModel employee = null)
         {
             InitializeComponent();
+            _context = new CZNEntities1();
 
             _employee = employee ?? new AdminEmployeesModel();
             DataContext = _employee;
 
-            cbDepartments.ItemsSource = Helper.GetContext().Departments.ToList();
-            cbPositions.ItemsSource = Helper.GetContext().Positions.ToList();
-
-            if (!string.IsNullOrEmpty(_employee.Department))
-                cbDepartments.SelectedItem = cbDepartments.ItemsSource
-                    .Cast<dynamic>()
-                    .FirstOrDefault(d => d.Name == _employee.Department);
-
-            if (!string.IsNullOrEmpty(_employee.Position))
-                cbPositions.SelectedItem = cbPositions.ItemsSource
-                    .Cast<dynamic>()
-                    .FirstOrDefault(p => p.Title == _employee.Position);
+            LoadComboBoxData();
 
             chkIsAdmin.Checked += (s, e) => pnlAdminCredentials.Visibility = Visibility.Visible;
             chkIsAdmin.Unchecked += (s, e) => pnlAdminCredentials.Visibility = Visibility.Collapsed;
             pnlAdminCredentials.Visibility = _employee.IsAdmin ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        private void LoadComboBoxData()
+        {
+            _context.Departments.Load();
+            _context.Positions.Load();
+
+            cbDepartments.ItemsSource = _context.Departments.Local;
+            cbPositions.ItemsSource = _context.Positions.Local;
+
+            if (!string.IsNullOrEmpty(_employee.Department))
+                cbDepartments.SelectedValue = _employee.Department;
+
+            if (!string.IsNullOrEmpty(_employee.Position))
+                cbPositions.SelectedValue = _employee.Position;
+        }
+
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            UpdateBindings();
+
             if (string.IsNullOrWhiteSpace(_employee.LastName) ||
-                cbDepartments.SelectedItem == null ||
-                cbPositions.SelectedItem == null)
+               string.IsNullOrWhiteSpace(_employee.FirstName))
             {
-                MessageBox.Show("Заполните обязательные поля (Фамилия, Отдел, Должность)");
+                MessageBox.Show("Заполните Фамилию и Имя");
                 return;
             }
 
-            _employee.Department = ((dynamic)cbDepartments.SelectedItem).Name;
-            _employee.Position = ((dynamic)cbPositions.SelectedItem).Title;
-
-            string password = null;
-            if (_employee.IsAdmin)
+            if (cbDepartments.SelectedItem == null || cbPositions.SelectedItem == null)
             {
-                if (string.IsNullOrWhiteSpace(txtUsername.Text))
-                {
-                    MessageBox.Show("Для администратора необходимо указать логин");
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(txtPassword.Password) && string.IsNullOrEmpty(_employee.Username))
-                {
-                    MessageBox.Show("Для администратора необходимо указать пароль");
-                    return;
-                }
-
-                password = txtPassword.Password;
+                MessageBox.Show("Выберите Отдел и Должность");
+                return;
             }
 
-            if (Helper.SaveEmployee(_employee, _employee.IsAdmin ? txtUsername.Text : null, password))
+            if (_employee.IsAdmin && string.IsNullOrWhiteSpace(txtUsername.Text))
             {
-                DialogResult = true;
-                Close();
+                MessageBox.Show("Укажите логин для администратора");
+                return;
+            }
+
+            try
+            {
+                bool result = Helper.SaveEmployee(_employee,
+                    _employee.IsAdmin ? txtUsername.Text : null,
+                    _employee.IsAdmin ? txtPassword.Password : null);
+
+                if (result)
+                {
+                    DialogResult = true;
+                    Close();
+                }
+                else
+                {
+                    MessageBox.Show("Ошибка сохранения");
+                }
+            }
+            finally
+            {
+                _context?.Dispose();
             }
         }
 
+        private void UpdateBindings()
+        {
+            cbDepartments.GetBindingExpression(ComboBox.SelectedValueProperty)?.UpdateSource();
+            cbPositions.GetBindingExpression(ComboBox.SelectedValueProperty)?.UpdateSource();
+        }
+
+        private void cbDepartments_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbDepartments.SelectedItem is Departments selectedDepartment)
+            {
+                _employee.Department = selectedDepartment.Name;
+                _employee.DepartmentAddress = selectedDepartment.Address;
+
+                var district = _context.Districts
+                    .FirstOrDefault(d => d.DistrictID == selectedDepartment.DistrictID);
+                _employee.DistrictName = district?.Name;
+
+                OnPropertyChanged(nameof(_employee.Department));
+                OnPropertyChanged(nameof(_employee.DepartmentAddress));
+                OnPropertyChanged(nameof(_employee.DistrictName));
+            }
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
             Close();
         }
-        private void cbDepartments_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Window_Closed(object sender, System.EventArgs e)
         {
-            if (cbDepartments.SelectedItem is Departments selectedDepartment && DataContext is AdminEmployeesModel employee)
-            {
-                employee.Department = selectedDepartment.Name;
-                employee.DepartmentAddress = selectedDepartment.Address;
-
-                using (var context = Helper.GetContext())
-                {
-                    var district = context.Districts
-                        .FirstOrDefault(d => d.DistrictID == selectedDepartment.DistrictID);
-                    employee.DistrictName = district?.Name;
-                }
-
-                OnPropertyChanged(nameof(employee.Department));
-                OnPropertyChanged(nameof(employee.DepartmentAddress));
-                OnPropertyChanged(nameof(employee.DistrictName));
-            }
-        }
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            _context?.Dispose();
         }
     }
 }

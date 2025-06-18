@@ -14,5 +14,6 @@ namespace CZN
     /// </summary>
     public partial class App : Application
     {
+        public static int CurrentAdminId { get; set; }
     }
 }
